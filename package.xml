@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>asr_lib_ism</name>
+  <version>1.0.0</version>
+  <description>This package integrates a library for scene recognition based on implicit shape models (ISM) to the ros environment.</description>
+  <author>Hanselmann Fabian, Heller Florian, Heizmann Heinrich, Kübler Marcel, Mehlhaus Jonas, Meißner Pascal, Qattan Mohamad, Reckling Reno, Stroh Daniel</author>
+  <maintainer email="asr-ros@lists.kit.edu">Meißner Pascal</maintainer>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
