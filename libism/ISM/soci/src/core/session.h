@@ -4,9 +4,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-
 #ifndef SOCI_SESSION_H_INCLUDED
 #define SOCI_SESSION_H_INCLUDED
+
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
 #include "once-temp-type.h"
 #include "query_transformation.h"

@@ -194,7 +194,7 @@ namespace ISM
 					}
 				}
 				if (it < tracksInCurrentPattern->tracks.size() - 1 &&
-						!tracksInCurrentPattern->tracks[it]->objects.size() ==
+                                                tracksInCurrentPattern->tracks[it]->objects.size() !=
 						tracksInCurrentPattern->tracks[it + 1]->objects.size())
 				{
 					std::cerr<<"Corrupt database\n";
