@@ -98,7 +98,11 @@ std::size_t connection_pool::lease()
     std::size_t pos;
 
     // no timeout
+#ifdef NDEBUG
+    try_lease(pos, -1);
+#else
     bool const success = try_lease(pos, -1);
+#endif
     assert(success);
 
     return pos;
