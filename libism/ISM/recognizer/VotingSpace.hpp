@@ -42,7 +42,7 @@ public:
         maxProjectionAngleDeviation(maxProjectionAngleDeviation),
 	mRaterType(raterType),
 	halfBinSize(binSize/(2.0)),
-	squaredRadius((3.0 / 2.0) * binSize * binSize),
+    squaredRadius((3.0 / 4.0) * binSize * binSize),
         offsetOfSphere((sqrt(3) * binSize / 2.0) - halfBinSize),
     nThreads(boost::thread::hardware_concurrency()),
         threads(nThreads),
