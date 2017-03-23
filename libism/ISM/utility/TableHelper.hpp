@@ -60,6 +60,9 @@ namespace ISM {
 
     int getLastInsertId(const std::string& tablename) const;
 
+    const std::set<std::string> getObjectsInPattern(std::string pattern_name);
+
+
     /* Functions that are used by recorder to insert object data into table. */
     int insertRecordedObject(const boost::shared_ptr<Object>& o, int setId) const;
     int insertRecordedObjectSet(const boost::shared_ptr<ObjectSet>& os, const std::string& patternName) const;

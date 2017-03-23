@@ -22,6 +22,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <map>
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
+
 namespace ISM {
 
 /*******************
@@ -63,6 +64,16 @@ void TableHelper::createColumnsIfNecessary() {
             }
         }
     }
+}
+
+const std::set<std::string> TableHelper::getObjectsInPattern(std::string pattern_name){
+    rowset<row> rs = ((*sqlite).prepare<<"SELECT DISTINCT type, observedID FROM recorded_objects o JOIN recorded_sets s on o.setId = s.id where s.patternId = (select id from recorded_patterns where name = '" << pattern_name << "');");
+
+    std::set<std::string> types;
+    BOOST_FOREACH(row const& row, rs) {
+        types.insert(row.get<std::string>(0) + row.get<std::string>(1));
+    }
+    return types;
 }
 
 void TableHelper::createTablesIfNecessary() const {
