@@ -40,8 +40,22 @@ namespace ISM {
 
   void Pose::serialize(std::ostream& strm) const {
     strm<<"{"<<std::endl<<"\"point\": "<<json(this->point)<<", "<<std::endl
-	<<"\"quaternion\": "<<json(this->quat)<<", "<<std::endl
+    <<"\"quaternion\": "<<json(this->quat)<<", "<<std::endl
 	<<"\"xAxis\": "<<json(GeometryHelper::vectorToPoint(GeometryHelper::getAxisFromQuat(this->quat)))
 	<<std::endl<<"}";
+  }
+
+  void Pose::convertPoseIntoFrame(const boost::shared_ptr<Pose>& pFrame, boost::shared_ptr<Pose>& pResult)
+  {
+    // Initialize the result pointer.
+    pResult.reset(new Pose());
+
+    // Calculate the relative position by subtracting the position of the child from the parent position.
+    // Rotate the resulting relative position into the parent frame.
+     pResult->point.reset(new ISM::Point(pFrame->point->getEigen() - point->getEigen()));
+
+
+    // The relative orientation is defined as the difference between the orientation of parent and child.
+    pResult->quat.reset(new ISM::Quaternion(quat->getEigen() * pFrame->quat->getEigen().inverse()));
   }
 }

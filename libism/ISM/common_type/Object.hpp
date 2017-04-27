@@ -76,10 +76,7 @@ class Object: public Serializable
 
         inline bool operator<(const Object& rhs) const
         {
-            if(this->type != rhs.type)
-                return this->type < rhs.type;
-            else
-                return this->observedId < rhs.observedId;
+            return this->type < rhs.type && this->observedId < rhs.observedId;
         }
 };
 typedef boost::shared_ptr<Object> ObjectPtr;

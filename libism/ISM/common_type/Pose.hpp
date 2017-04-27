@@ -66,6 +66,15 @@ public:
     Pose(PointPtr p, QuaternionPtr quat) : point(p), quat(quat) {};
 
     virtual void serialize(std::ostream& strm) const;
+
+    /**
+     * Converts the pose represented by pChild into a pose in the frame represented by pParent. The result is stored in pResult.
+     *
+     * @param pFrame The frame to convert the pose into.
+     * @param pResult The result of the calculation.
+     */
+    void convertPoseIntoFrame(const boost::shared_ptr<Pose>& pFrame, boost::shared_ptr<Pose>& pResult);
+
 };
 typedef boost::shared_ptr<Pose> PosePtr;
 

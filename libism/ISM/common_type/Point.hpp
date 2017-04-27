@@ -36,9 +36,11 @@ public:
     Eigen::Vector3d eigen;
 
     Point () : eigen(0.0, 0.0, 0.0) { }
-  Point(double x, double y, double z) : eigen(x,y,z) { }
+    Point(double x, double y, double z) : eigen(x,y,z) { }
+    Point(Eigen::Vector3d v) : eigen(v) { }
 
     virtual void serialize(std::ostream& strm) const;
+  Eigen::Vector3d getEigen();
 };
 typedef boost::shared_ptr<Point> PointPtr;
 

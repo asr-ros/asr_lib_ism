@@ -58,4 +58,8 @@ namespace ISM {
         double diffZ = fabs(q1.eigen.z() - q2.eigen.z());
     	return diffW < threshold && diffX < threshold && diffY < threshold && diffZ < threshold;
 	}
+
+    Eigen::Quaternion<double> Quaternion::getEigen() {
+        return this->eigen;
+    }
 }

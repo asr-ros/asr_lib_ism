@@ -36,6 +36,9 @@ namespace ISM {
             {
                 for (auto& objectPtr : other.objects)
                 {
+                    if(this->mIdentifier == ""){
+                        this->mIdentifier = other.mIdentifier;
+                    }
                     this->objects.push_back(ObjectPtr(new Object(*objectPtr)));
                 }
             };
@@ -44,6 +47,7 @@ namespace ISM {
             void insert(ObjectPtr o);
 
             std::vector<ObjectPtr> objects;
+            std::string mIdentifier;
 
     };
     typedef boost::shared_ptr<ObjectSet> ObjectSetPtr;

@@ -31,8 +31,10 @@ public:
 
   Quaternion() : eigen(1.0, 0.0, 0.0, 0.0) { }
   Quaternion(double w, double x, double y, double z) : eigen(w, x, y, z) { }
+  Quaternion(Eigen::Quaternion<double> q) : eigen(q) { }
 
     virtual void serialize(std::ostream& strm) const;
+  Eigen::Quaternion<double> getEigen();
 };
 typedef boost::shared_ptr<Quaternion> QuaternionPtr;
 

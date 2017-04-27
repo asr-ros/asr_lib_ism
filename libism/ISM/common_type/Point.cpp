@@ -59,4 +59,8 @@ namespace ISM {
         double diffZ = fabs(p1.eigen.z() - p2.eigen.z());
     	return diffX < threshold && diffY < threshold && diffZ < threshold;
 	}
+
+    Eigen::Vector3d Point::getEigen() {
+        return this->eigen;
+    }
 }
