@@ -52,8 +52,7 @@ namespace ISM {
 
     // Calculate the relative position by subtracting the position of the child from the parent position.
     // Rotate the resulting relative position into the parent frame.
-     pResult->point.reset(new ISM::Point(pFrame->point->getEigen() - point->getEigen()));
-
+    pResult->point.reset(new ISM::Point(pFrame->quat->getEigen().toRotationMatrix().inverse() * (point->getEigen() - pFrame->point->getEigen())));
 
     // The relative orientation is defined as the difference between the orientation of parent and child.
     pResult->quat.reset(new ISM::Quaternion(quat->getEigen() * pFrame->quat->getEigen().inverse()));
