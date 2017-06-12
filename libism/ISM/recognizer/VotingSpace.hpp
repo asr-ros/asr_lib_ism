@@ -30,7 +30,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 namespace ISM {
 
-//Computed VotedPoses (reference pose votes) are inserted into voxelgrid an each voxelgrid element is searched for promising combinations of votes.
+//Computed VotedPoses (reference pose votes) are inserted into voxelgrid and each voxelgrid element is searched for promising combinations of votes.
 class VotingSpace : public boost::enable_shared_from_this<VotingSpace>
 {
 
@@ -51,11 +51,11 @@ public:
     { }
 
     //Insertion into grid and its evaluation. This method is called for each sub-ISM at a time.
-    VotingResultPtrs fillAndEvalVotingSpace(VotedPosePtrs& votes);
+    VotingResultPtrs fillAndEvalVotingSpace(VotedPosePtrs& votes, bool enabledSelfVoteCheck);
     //Converts from cartesian to grid coordinates.
     VotingBinPtr getBin(double x, double y, double z);
     //Implements radius search during votingspace evaluation.
-    TypeToInnerMap collectVotesInSphere(PointPtr& centerPtr);
+    TypeToInnerMap collectVotesInSphere(PointPtr& centerPtr, bool& voteFromReferenceObjectExists);
 
     int discretizeToBins(double x);
 

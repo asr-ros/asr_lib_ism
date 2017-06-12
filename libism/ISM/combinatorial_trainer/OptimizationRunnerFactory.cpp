@@ -72,7 +72,7 @@ namespace ISM {
 		{
 			case 0:
 				recognizer = ISM::RecognizerPtr(new ISM::Recognizer("", evaluatorParams.binSize,
-							evaluatorParams.maxAngleDeviation));
+                            evaluatorParams.maxAngleDeviation, false));
 				objectSetValidator = ISM::ObjectSetValidatorPtr(new ObjectSetValidator(recognizer,
 							evaluatorParams.confidenceThreshold));
 				evaluator = EvaluatorPtr(new Tester(objectSetValidator, testSets.first, testSets.second,

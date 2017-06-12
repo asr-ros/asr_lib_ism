@@ -37,7 +37,7 @@ namespace ISM {
   {
   public:
 
-    VotingResultCalculator(VotingSpacePtr votingSpaceInEval, int raterType = 0);
+    VotingResultCalculator(VotingSpacePtr votingSpaceInEval, bool enabledSelfVoteCheck, int raterType = 0);
 
     //Compute VotingResults (result) from a set of VotedPoses (votedReferencePoses). Calls searchFittingVotes.
     bool computeVotingResult(VotingResultPtr& result, TypeToInnerMap votedReferencePoses);
@@ -66,8 +66,11 @@ namespace ISM {
     //Cache data for rating to prevent calculating already calculated data again.
     RatingDataPtr ratingCache;
 
-    //To prevent that the same object votes multiple types when evaluating an originForFitting (could happen in ism tree during iterative scene recognition).
+    //To prevent that the same object votes multiple times when evaluating an originForFitting (could happen in ism tree during iterative scene recognition).
     std::set<ObjectPtr> sourcesWithFittingVotes;
+
+    //If SelfVoteCheck is active, the use of votedPose from a selfvoting object as originForFitting, in case such an object exists, is ensured.
+    bool enabledSelfVoteCheck;
 
     //Both following methods inlined for performance reasons.
 
@@ -113,7 +116,7 @@ namespace ISM {
 	  if ((sourcesWithFittingVotes.find(currentVotedPose->source) != sourcesWithFittingVotes.end()))
 	    continue;
 
-	  //Reject all votes whose deviation form originForFitting exceed given thresholds. They cannot be regarded as supporting originForFitting.
+      //Reject all votes whose deviation from originForFitting exceed given thresholds. They cannot be regarded as supporting originForFitting.
 	  if (mRater->isVoteSupportingReference(currentVotedPose, originPose, ratingCache))
 	    {
 	      //Count it as a supporting vote for origin for fitting

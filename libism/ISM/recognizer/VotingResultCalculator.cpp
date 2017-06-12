@@ -22,7 +22,7 @@ namespace ISM {
 
   typedef GeometryHelper GH;
 
-  VotingResultCalculator::VotingResultCalculator(VotingSpacePtr votingSpaceInEval, int raterType) : mVotingSpaceInEval(votingSpaceInEval)
+  VotingResultCalculator::VotingResultCalculator(VotingSpacePtr votingSpaceInEval, bool enableSelfVoteCheck, int raterType) : mVotingSpaceInEval(votingSpaceInEval), enabledSelfVoteCheck(enableSelfVoteCheck)
   
   {
 
@@ -42,6 +42,9 @@ namespace ISM {
   bool VotingResultCalculator::computeVotingResult(VotingResultPtr& result, TypeToInnerMap votedReferencePoses)
 
   {
+    //We check if there are any reference object votes in the vote set from radius search.
+    bool voteFromReferenceObjectExists;
+
 	//Now we go through all votes, used as origins for fitting.
           for (TypeToInnerMap::iterator typeIt = votedReferencePoses.begin();
                typeIt != votedReferencePoses.end(); typeIt++)
@@ -67,7 +70,13 @@ namespace ISM {
 			}
 
                       //Get votes to fit from radius search
-                      TypeToInnerMap votes = mVotingSpaceInEval->collectVotesInSphere(originForFitting->pose->point);
+                      TypeToInnerMap votes = mVotingSpaceInEval->collectVotesInSphere(originForFitting->pose->point, voteFromReferenceObjectExists);
+
+                      //In case a reference vote exists in our votedPose, we just accept selfvotes from it as originForFitting.
+                      if (enabledSelfVoteCheck && voteFromReferenceObjectExists && !GH::isSelfVote(originForFitting->vote))
+                      {
+                          continue;
+                      }
 
                       //Set votedPose, to which others are going to be fitted, before we start matching the rest.
                       originPose = originForFitting->pose;

@@ -404,7 +404,7 @@ namespace ISM
 		PatternNameToObjectSet validTestSetsPerPattern;
 		PatternNameToObjectSet invalidTestSetsPerPattern;
 
-		RecognizerPtr recognizer = ISM::RecognizerPtr(new ISM::Recognizer("", binSize, maxAngleDeviation));
+        RecognizerPtr recognizer = ISM::RecognizerPtr(new ISM::Recognizer("", binSize, maxAngleDeviation, false));
 
 		ObjectSetValidatorPtr objectSetValidator = 
 			ObjectSetValidatorPtr(new ObjectSetValidator(recognizer, confidenceThreshold));

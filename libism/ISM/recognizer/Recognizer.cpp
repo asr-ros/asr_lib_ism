@@ -34,8 +34,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 namespace ISM {
 
-  Recognizer::Recognizer(const std::string& dbfilename, double bin_size, double maxProjectionAngleDeviation, int raterType) :
-    bin_size(bin_size), maxProjectionAngleDeviation(maxProjectionAngleDeviation), mRaterType(raterType)
+  Recognizer::Recognizer(const std::string& dbfilename, double bin_size, double maxProjectionAngleDeviation, bool enabledSelfVoteCheck, int raterType) :
+    bin_size(bin_size), maxProjectionAngleDeviation(maxProjectionAngleDeviation), enabledSelfVoteCheck(enabledSelfVoteCheck), mRaterType(raterType)
   {
     this->tableHelper = TableHelperPtr(new TableHelper(dbfilename));
     this->objectTypes = this->tableHelper->getObjectTypes();
@@ -50,7 +50,7 @@ namespace ISM {
     this->votingCache.clear();
     this->ismResults.clear();
 
-    //Scene recognition is an iterative process in which isms in trees are evaluated according to height tree height.
+    //Scene recognition is an iterative process in which isms in trees are evaluated according to tree height.
     TreeHeightToPatternName::reverse_iterator treeHeightIt;
     //Trees are evaluated starting at the leaf with max tree height in the db, going until the roots of the trees.
     for(treeHeightIt = patternPerTreeHeight.rbegin(); treeHeightIt != patternPerTreeHeight.rend(); treeHeightIt++) {
@@ -153,7 +153,7 @@ namespace ISM {
 
       //patternToVotedPoses is a container for voted poses (reference pose estimates) of all isms in the db.
       //Insert all votedPoses (reference pose votes) into voxelgrid to discretize search space.
-      VotingResultPtrs vsresults = vsPtr->fillAndEvalVotingSpace(votedPosesForCurrentPattern->second);
+      VotingResultPtrs vsresults = vsPtr->fillAndEvalVotingSpace(votedPosesForCurrentPattern->second, enabledSelfVoteCheck);
 
       // Buffer VotingSpace for its visualization if request exists.
       if (!patternForVotingSpaceViz.empty() && (patternName.find(patternForVotingSpaceViz) == 0))
@@ -373,13 +373,13 @@ namespace ISM {
     }
 
     //Sort recognition results for root isms according to patternName.
-    std::map<std::string, std::vector<RecognitionResultPtr> > resultsForPattern;
+    std::map<std::string, std::vector<RecognitionResultPtr> > patternNameToTopLevelResults;
     for (RecognitionResultPtr& res : topLevelResults) {
-      std::map<std::string, std::vector<RecognitionResultPtr> >::iterator it = resultsForPattern.find(res->patternName);
-      if (it == resultsForPattern.end()) {
+      std::map<std::string, std::vector<RecognitionResultPtr> >::iterator it = patternNameToTopLevelResults.find(res->patternName);
+      if (it == patternNameToTopLevelResults.end()) {
 	std::vector<RecognitionResultPtr> p;
 	p.push_back(res);
-	resultsForPattern.insert(std::make_pair(res->patternName, p));
+    patternNameToTopLevelResults.insert(std::make_pair(res->patternName, p));
       } else {
 	(*it).second.push_back(res);
       }
@@ -387,7 +387,7 @@ namespace ISM {
     std::vector<RecognitionResultPtr> ret;
 
     //sort results by confidence and gather the subpatterns for the requested number of results per pattern
-    for (const std::pair<std::string, std::vector<RecognitionResultPtr> >& patternPair : resultsForPattern) {
+    for (const std::pair<std::string, std::vector<RecognitionResultPtr> >& patternPair : patternNameToTopLevelResults) {
       std::vector<RecognitionResultPtr> rlist = patternPair.second;
       //Sort results for a given pattern.
       std::stable_sort(rlist.begin(), rlist.end(), [](const RecognitionResultPtr& o1, const RecognitionResultPtr& o2) {

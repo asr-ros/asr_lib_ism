@@ -131,7 +131,7 @@ int main ()
 	  invalidSets = invalidPatterns->objectSets;
 	}  
       cout<<invalidSets.size()<<endl;
-      RecognizerPtr recog(new Recognizer(model.second, 0.03, 10));
+      RecognizerPtr recog(new Recognizer(model.second, 0.03, 10, false));
       cout<<"could create recognizer\n";
       for (ObjectSetPtr& validSet : validSets)
 	{

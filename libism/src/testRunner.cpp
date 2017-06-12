@@ -206,7 +206,7 @@ int main(int argc, char** argv) {
                 }
             }
 
-            Recognizer recognizer(testFile, test.bin_size, 10);
+            Recognizer recognizer(testFile, test.bin_size, 10, true);
 
             struct timeval start, end;
 

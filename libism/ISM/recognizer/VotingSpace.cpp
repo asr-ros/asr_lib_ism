@@ -37,7 +37,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 namespace ISM {
 
-VotingResultPtrs VotingSpace::fillAndEvalVotingSpace(VotedPosePtrs& votes)
+VotingResultPtrs VotingSpace::fillAndEvalVotingSpace(VotedPosePtrs& votes, bool enabledSelfVoteCheck)
 {
     //Flush voxelgrid from votes of e.g. last sub-ISM that used the grid to process its VotedPoses.
     voteGrid.clear();
@@ -47,7 +47,7 @@ VotingResultPtrs VotingSpace::fillAndEvalVotingSpace(VotedPosePtrs& votes)
     for (int i : boost::irange(0, nThreads)) {
         votingBinsPerThread[i].clear();
         resultsPerThread[i].clear();
-        calculatorPerThread.push_back(VotingResultCalculatorPtr(new VotingResultCalculator(votingSpaceInEval, mRaterType)));
+        calculatorPerThread.push_back(VotingResultCalculatorPtr(new VotingResultCalculator(votingSpaceInEval, enabledSelfVoteCheck, mRaterType)));
     }
 
     std::sort(votes.begin(), votes.end(), [](const VotedPosePtr& v1, const VotedPosePtr& v2)
@@ -119,8 +119,10 @@ VotingBinPtr VotingSpace::getBin(double x, double y, double z)
     return voteGrid[binx][biny][binz];
 }
 
-TypeToInnerMap VotingSpace::collectVotesInSphere(PointPtr &sphereCenter)
+TypeToInnerMap VotingSpace::collectVotesInSphere(PointPtr &sphereCenter, bool& voteFromReferenceObjectExists)
 {
+    voteFromReferenceObjectExists = false;
+
     const int binXIdx = discretizeToBins(sphereCenter->eigen.x());
     const int binYIdx = discretizeToBins(sphereCenter->eigen.y());
     const int binZIdx = discretizeToBins(sphereCenter->eigen.z());
@@ -193,7 +195,11 @@ TypeToInnerMap VotingSpace::collectVotesInSphere(PointPtr &sphereCenter)
 		       idIt != typeIt->second.end(); idIt++)
                     {
 		      //Categorizing votedPoses per type and id is required for reducing optimization of votedPose combination to optimization of votedPoses per type and id combination.
-		      VotedPosePtrs& mapForCurrentTypeAndId = currentVoteMap[typeIt->first][idIt->first];                          
+              VotedPosePtrs& mapForCurrentTypeAndId = currentVoteMap[typeIt->first][idIt->first];
+
+              //Self vote needs only to be checked once per type and id combination since all votes of the reference object are selfvotes.
+              if (GeometryHelper::isSelfVote(idIt->second.front()->vote))
+                voteFromReferenceObjectExists = true;
 
 		      for (VotedPosePtrs::iterator votedPosePtrsIt = idIt->second.begin();
 			   votedPosePtrsIt != idIt->second.end(); votedPosePtrsIt++)

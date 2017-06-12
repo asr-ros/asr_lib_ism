@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
     }
 
     TableHelper t(vm["database-file"].as<string>());
-    RecognizerPtr r(new Recognizer(vm["database-file"].as<string>(), bin_size, 10));
+    RecognizerPtr r(new Recognizer(vm["database-file"].as<string>(), bin_size, 10, false));
     if (vm.count("pattern-name")) {
         vector<string> patternNames = vm["pattern-name"].as<vector<string> >();
         for (string& name : patternNames) {

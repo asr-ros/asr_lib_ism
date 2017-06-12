@@ -56,6 +56,8 @@ namespace ISM {
     //All voted poses, calculated during voting, arranged according to the pattern, in which voxel grid evaluation should take place.
     PatternNameToVotedPoses patternToVotedPoses;
 
+    bool enabledSelfVoteCheck;
+
     //Simple or APO-Rater enum.
     const int mRaterType;
 
@@ -74,9 +76,10 @@ namespace ISM {
      * @param dbfilename File containing scenes we want to be able to detect with this recognizer.
      * @param bin_size Side length of cubes (bins) making up voxel grid in which hough voting is performed. Maximal accepted distance between scene reference hypotheses of different objects in a bin.
      * @param maxProjectionAngleDeviation Maximal accepted difference in orientations of scene reference hypotheses of different objects in a bin.
+     * @param enabledSelfVoteCheck Self-Vote-Check: Ensures the use of votedPose from a selfvoting object as originForFitting, if such an object exist.
      * @param raterType Objective function that is used for rating how well votedPoses in voxel grid match each other (especially in recognition results).
      */
-    Recognizer(const std::string& dbfilename, double bin_size, double maxProjectionAngleDeviation, int raterType = 0);
+    Recognizer(const std::string& dbfilename, double bin_size, double maxProjectionAngleDeviation, bool enabledSelfVoteCheck, int raterType = 0);
 
     /**
      * Find instances of scenes (or scene models) loaded beforehand in a spatial configuration of objects provided to this method. Returns hypotheses on existing scenes as subsets of that configuration that match a model during scene recognition by our hough voting scheme. Hyptheses are rated by confidences being the percentage of objects in the scene we detected in the provided object configuration.
@@ -111,7 +114,7 @@ namespace ISM {
       this->patternDefinitions = patternDefinitions;
     }
 
-    //Create mapping that assigns all isms in the trees in db to their hight in their tree.
+    //Create mapping that assigns all isms in the trees in db to their height in their tree.
     void arrangePatternsAccordingToTreeHeight();
 	
     //Reset everything before looking for another scene
