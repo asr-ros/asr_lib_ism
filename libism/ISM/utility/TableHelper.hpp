@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #pragma once
 
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <map>
@@ -64,8 +65,8 @@ namespace ISM {
 
 
     /* Functions that are used by recorder to insert object data into table. */
-    int insertRecordedObject(const boost::shared_ptr<Object>& o, int setId) const;
-    int insertRecordedObjectSet(const boost::shared_ptr<ObjectSet>& os, const std::string& patternName) const;
+    int insertRecordedObject(const boost::shared_ptr<Object>& o, int setId);
+    int insertRecordedObjectSet(const boost::shared_ptr<ObjectSet>& os, const std::string& patternName);
     int insertRecordedPattern(const std::string& patternName) const;
     int insertRecordedPattern(const RecordedPatternPtr& pattern) const;
 
@@ -172,7 +173,9 @@ namespace ISM {
      * @return ID of the object in database.
      */
     int updateObjectQuaternion(int dbId, ObjectPtr object);
-
+private:
+    int insertRecordedObjectIfNecessary(ObjectPtr object);
+    boost::unordered_map<std::pair<std::string, std::string>, int> objectIdMap_;
   };
 
   typedef boost::shared_ptr<TableHelper> TableHelperPtr;

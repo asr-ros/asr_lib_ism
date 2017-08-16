@@ -33,6 +33,7 @@ TableHelper::TableHelper(std::string dbfilename) {
     this->sqlite.reset(new session(sqlite3, dbfilename.c_str()));
     this->createTablesIfNecessary();
     this->createColumnsIfNecessary();
+    objectIdMap_.clear();
 }
 
 TableHelper::~TableHelper() {
@@ -86,7 +87,8 @@ void TableHelper::createTablesIfNecessary() const {
     }
 
     std::map<std::string, std::string> tableDefs;
-    tableDefs["recorded_objects"] = "id INTEGER PRIMARY KEY, type TEXT, observedId TEXT, setId INTEGER, px FLOAT, py FLOAT, pz FLOAT, qw FLOAT, qx FLOAT, qy FLOAT, qz FLOAT, ressourcePath TEXT";
+    tableDefs["recorded_objects"] = "id INTEGER PRIMARY KEY, type TEXT, observedId TEXT, resourcePath TEXT";
+    tableDefs["recorded_poses"] = "id INTEGER PRIMARY KEY, objectId INTEGER, setId INTEGER, px FLOAT, py FLOAT, pz FLOAT, qw FLOAT, qx FLOAT, qy FLOAT, qz FLOAT";
     tableDefs["recorded_sets"] = "id INTEGER PRIMARY KEY, patternId INTEGER";
     tableDefs["recorded_patterns"] = "id INTEGER PRIMARY KEY, name TEXT UNIQUE";
     tableDefs["model_objects"] = "id INTEGER PRIMARY KEY, type TEXT UNIQUE";
@@ -128,6 +130,7 @@ void TableHelper::dropTable(const std::string& tablename) const {
 void TableHelper::dropRecordTables() const
 {
     this->dropTable("recorded_objects");
+    this->dropTable("recorded_poses");
     this->dropTable("recorded_patterns");
     this->dropTable("recorded_sets");
 }
@@ -135,6 +138,7 @@ void TableHelper::dropRecordTables() const
 void TableHelper::dropTables() const
 {
     this->dropTable("recorded_objects");
+    this->dropTable("recorded_poses");
     this->dropTable("recorded_patterns");
     this->dropTable("recorded_sets");
     this->dropTable("model_votes");
@@ -163,11 +167,37 @@ int TableHelper::getLastInsertId(const std::string& tablename) const {
 /*******************
       Recorded
   *******************/
+int TableHelper::insertRecordedObjectIfNecessary(ObjectPtr object)
+{
+    std::pair<std::string, std::string> objectIdentifier = std::make_pair(object->type, object->observedId);
+    if(objectIdMap_.find(objectIdentifier) != objectIdMap_.end())
+    {
+     return objectIdMap_[objectIdentifier];
+    }
 
-int TableHelper::insertRecordedObject(const boost::shared_ptr<Object>& o, int setId) const {
-    (*sqlite) << "INSERT INTO `recorded_objects` (type, observedId, setId, px, py, pz, qw, qx, qy, qz, ressourcePath) values (:type, :oid, :setId, :px, :py, :pz, :qw, :qx, :qy, :qz, :ressourcePath);",
-            use(o->type),
-            use(o->observedId),
+    int id;
+    indicator ind;
+    (*sqlite) << "SELECT id FROM `recorded_objects` where type = :type and observedId = :observedId;", into(id, ind), use(object->type),use(object->observedId);
+    if ((*sqlite).got_data() && ind == i_ok) {
+        objectIdMap_[objectIdentifier] = id;
+        return id;
+    } else {
+        int lastInsertId = getLastInsertId("recorded_objects");
+        (*sqlite) << "INSERT INTO `recorded_objects` (id, type, observedId, resourcePath) values (:id, :type, :oid, :resourcePath);",
+                use(lastInsertId+1),
+                use(object->type),
+                use(object->observedId),
+                use(object->ressourcePath.string());
+        objectIdMap_[objectIdentifier] = lastInsertId + 1;
+        return lastInsertId + 1;
+    }
+}
+
+
+int TableHelper::insertRecordedObject(const boost::shared_ptr<Object>& o, int setId) {
+    int objectId = this->insertRecordedObjectIfNecessary(o);
+    (*sqlite) << "INSERT INTO `recorded_poses` (objectId, setId, px, py, pz, qw, qx, qy, qz) values (:objectId :setId, :px, :py, :pz, :qw, :qx, :qy, :qz);",
+            use(objectId),
             use(setId),
             use(o->pose->point->eigen.x()),
             use(o->pose->point->eigen.y()),
@@ -175,13 +205,11 @@ int TableHelper::insertRecordedObject(const boost::shared_ptr<Object>& o, int se
             use(o->pose->quat->eigen.w()),
             use(o->pose->quat->eigen.x()),
             use(o->pose->quat->eigen.y()),
-            use(o->pose->quat->eigen.z()),
-            use(o->ressourcePath.string());
-
+            use(o->pose->quat->eigen.z());
     return this->getLastInsertId("recorded_objects");
 }
 
-int TableHelper::insertRecordedObjectSet(const ObjectSetPtr& os, const std::string& patternName) const {
+int TableHelper::insertRecordedObjectSet(const ObjectSetPtr& os, const std::string& patternName) {
     std::vector<boost::shared_ptr<Object> > objects = os->objects;
 
     transaction trans(*sqlite);
@@ -246,7 +274,7 @@ const RecordedPatternPtr TableHelper::getRecordedPattern(const std::string& patt
 
 const std::vector<int> TableHelper::getSetIds() const {
     std::vector<int> setIds;
-    rowset<int> rs = ((*sqlite).prepare<< "SELECT DISTINCT setId FROM `recorded_objects`;");
+    rowset<int> rs = ((*sqlite).prepare<< "SELECT DISTINCT setId FROM `recorded_poses`;");
 
     for (rowset<int>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
         setIds.push_back(*it);
@@ -257,7 +285,7 @@ const std::vector<int> TableHelper::getSetIds() const {
 const ObjectSetPtr TableHelper::getRecordedObjectSet(int setId) const {
     boost::shared_ptr<ObjectSet> s(new ObjectSet());
     rowset<row> rs = ((*sqlite).prepare<<
-                      "SELECT type, observedId, px, py, pz, qw, qx, qy, qz, ressourcePath FROM `recorded_objects` WHERE setId = :setId;",
+                      "SELECT ro.type, ro.observedId, rp.px, rp.py, rp.pz, rp.qw, rp.qx, rp.qy, rp.qz, ro.resourcePath FROM `recorded_objects` ro JOIN `recorded_poses` rp WHERE ro.id = rp.objectId AND setId = :setId;",
                       use(setId)
                       );
 
@@ -423,7 +451,7 @@ const std::set<std::string> TableHelper::getObjectTypes() const {
 }
 
 const std::map<std::string, boost::filesystem::path> TableHelper::getRessourcePaths() const {
-    rowset<row> rs = ((*sqlite).prepare<<"SELECT DISTINCT type, ressourcePath FROM `recorded_objects`;");
+    rowset<row> rs = ((*sqlite).prepare<<"SELECT DISTINCT type, resourcePath FROM `recorded_objects`;");
     std::map<std::string, boost::filesystem::path> types_to_ressource_paths_map;
     BOOST_FOREACH(row const& row, rs) {
         std::string type = row.get<std::string>(0);
@@ -666,7 +694,7 @@ int TableHelper::updateObjectQuaternion(int dbId, ObjectPtr object) {
     double qy = quat->eigen.y();
     double qz = quat->eigen.z();
     transaction trans(*sqlite);
-    (*sqlite)<< "UPDATE `recorded_objects` SET qw = :qw , qx = :qx , qy = :qy , qz = :qz WHERE id = :dbId;",
+    (*sqlite)<< "UPDATE `recorded_poses` SET qw = :qw , qx = :qx , qy = :qy , qz = :qz WHERE id = :dbId;",
                  use(qw), use(qx), use(qy), use(qz), use(dbId);
     trans.commit();
     return dbId;
