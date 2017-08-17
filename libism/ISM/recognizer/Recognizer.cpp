@@ -45,7 +45,7 @@ namespace ISM {
   }
 
   const std::vector<RecognitionResultPtr> Recognizer::recognizePattern(const ObjectSetPtr& objectSet,
-								       const double filterThreshold, const int resultsPerPattern) {
+                                       const double filterThreshold, const int resultsPerPattern, const std::string targetPatternName) {
     this->inputSet = ObjectSetPtr( new ObjectSet(*objectSet));
     this->votingCache.clear();
     this->ismResults.clear();
@@ -54,7 +54,6 @@ namespace ISM {
     TreeHeightToPatternName::reverse_iterator treeHeightIt;
     //Trees are evaluated starting at the leaf with max tree height in the db, going until the roots of the trees.
     for(treeHeightIt = patternPerTreeHeight.rbegin(); treeHeightIt != patternPerTreeHeight.rend(); treeHeightIt++) {
-
       //Get voted poses (also from cache) for all objects in all isms.
       this->calculateVotedPosesForAllObjects();
       //Search for RecognitionResults in all sub-ISMs at the current tree height
@@ -63,7 +62,7 @@ namespace ISM {
     }
     
     //Build up scene recognition results for ism trees from RecognitionResults of single sub-ISMs in tree.
-    return this->assembleIsmTrees(this->ismResults, filterThreshold, resultsPerPattern);
+    return this->assembleIsmTrees(this->ismResults, filterThreshold, resultsPerPattern, targetPatternName);
   
   }
 
@@ -114,7 +113,7 @@ namespace ISM {
 	      if (object->observedId == "" || object->observedId == vote->observedId)
                 {
 
-		  PatternPtr pattern = this->patternDefinitions[vote->patternName];
+          PatternPtr pattern = this->patternDefinitions[vote->patternName];
 		  //Calculate reference pose vote for given combination of input object estimate and vote (relative pose).
 		  PosePtr pose = this->calculatePoseFromVote(object->pose, vote);
 		  if (patternToVotedPoses.find(vote->patternName) == patternToVotedPoses.end())
@@ -354,14 +353,17 @@ namespace ISM {
   }
 
   std::vector<RecognitionResultPtr> Recognizer::assembleIsmTrees(const std::vector<RecognitionResultPtr>& ismResults,
-								 const double filterThreshold, const int resultsPerPattern) {
+                                 const double filterThreshold, const int resultsPerPattern,  const std::string targetPatternName) {
     std::map<std::string, std::vector<RecognitionResultPtr> > patternNameToResults;
 
     //Find root ism recognition results among recognition results for all isms in ism trees in database.
     std::vector<RecognitionResultPtr> topLevelResults;
     for (const RecognitionResultPtr& res : ismResults) {
       if (res->patternName.find("_sub") == std::string::npos) {
-	topLevelResults.push_back(res);
+          if(targetPatternName.empty() || targetPatternName == res->patternName)
+          {
+              topLevelResults.push_back(res);
+          }
       }
       //Create map keys for all top-level pattern names present in recognition results.
       std::map<std::string, std::vector<RecognitionResultPtr> >::iterator it = patternNameToResults.find(res->patternName);

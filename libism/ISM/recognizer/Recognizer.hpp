@@ -87,10 +87,11 @@ namespace ISM {
      * @param objectSet Object configuration in which scenes are tried to be detected.
      * @param filterThreshold Minimum confidence that a recognition result must dispose of, to be returned.
      * @param resultsPerPattern Maximum number of recognition results for each scene in db loaded beforehand.
+     * @param patternName name of pattern which should be recognized.
      * @return Recognition results in decreasing order of confidence.
      */
     const std::vector<RecognitionResultPtr> recognizePattern(const ObjectSetPtr& objectSet,
-							     const double filterThreshold = 0.0, const int resultsPerPattern = -1);
+                                 const double filterThreshold = 0.0, const int resultsPerPattern = -1, const std::string targetPatternName = "");
     
     std::map<ObjectPtr, std::vector<VotedPosePtr> > getVotingCache()
     {
@@ -160,7 +161,7 @@ namespace ISM {
 
     //After having performed iterative scene recognition process, gather tree like scene recognition result from the single RecognitionResults from all sub-ISMs in the ISM tree. Uses getSubPatternsForResult.
     static std::vector<RecognitionResultPtr> assembleIsmTrees(const std::vector<RecognitionResultPtr>& ismResults,
-							      const double filterThreshold, const int resultsPerPattern);
+                                  const double filterThreshold, const int resultsPerPattern, const std::string targetPatternName);
 
     //Search matching RecognitionResults in child ISMs in tree to build up tree structure of scene recognition result.
     static std::vector<RecognitionResultPtr> getSubPatternsForResult(RecognitionResultPtr result,
