@@ -196,7 +196,7 @@ int TableHelper::insertRecordedObjectIfNecessary(ObjectPtr object)
 
 int TableHelper::insertRecordedObject(const boost::shared_ptr<Object>& o, int setId) {
     int objectId = this->insertRecordedObjectIfNecessary(o);
-    (*sqlite) << "INSERT INTO `recorded_poses` (objectId, setId, px, py, pz, qw, qx, qy, qz) values (:objectId :setId, :px, :py, :pz, :qw, :qx, :qy, :qz);",
+    (*sqlite) << "INSERT INTO `recorded_poses` (objectId, setId, px, py, pz, qw, qx, qy, qz) values (:objectId, :setId, :px, :py, :pz, :qw, :qx, :qy, :qz);",
             use(objectId),
             use(setId),
             use(o->pose->point->eigen.x()),
@@ -206,6 +206,7 @@ int TableHelper::insertRecordedObject(const boost::shared_ptr<Object>& o, int se
             use(o->pose->quat->eigen.x()),
             use(o->pose->quat->eigen.y()),
             use(o->pose->quat->eigen.z());
+
     return this->getLastInsertId("recorded_objects");
 }
 
@@ -284,6 +285,7 @@ const std::vector<int> TableHelper::getSetIds() const {
 
 const ObjectSetPtr TableHelper::getRecordedObjectSet(int setId) const {
     boost::shared_ptr<ObjectSet> s(new ObjectSet());
+
     rowset<row> rs = ((*sqlite).prepare<<
                       "SELECT ro.type, ro.observedId, rp.px, rp.py, rp.pz, rp.qw, rp.qx, rp.qy, rp.qz, ro.resourcePath FROM `recorded_objects` ro JOIN `recorded_poses` rp WHERE ro.id = rp.objectId AND setId = :setId;",
                       use(setId)
