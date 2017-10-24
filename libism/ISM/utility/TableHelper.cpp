@@ -68,7 +68,7 @@ void TableHelper::createColumnsIfNecessary() {
 }
 
 const std::set<std::string> TableHelper::getObjectsInPattern(std::string pattern_name){
-    rowset<row> rs = ((*sqlite).prepare<<"SELECT DISTINCT type, observedID FROM recorded_objects o JOIN recorded_sets s on o.setId = s.id where s.patternId = (select id from recorded_patterns where name = '" << pattern_name << "');");
+    rowset<row> rs = ((*sqlite).prepare<<"SELECT DISTINCT ro.type, ro.observedID FROM recorded_objects ro JOIN recorded_poses rpo on ro.id = rpo.objectId JOIN recorded_sets rs on rpo.setId = rs.id JOIN recorded_patterns rpa on rs.patternId = rpa.id where rpa.name = '" << pattern_name << "';");
 
     std::set<std::string> types;
     BOOST_FOREACH(row const& row, rs) {
