@@ -658,7 +658,7 @@ const std::set<std::pair<std::string, std::string> > TableHelper::getObjectTypes
 }
 
 const std::vector<std::pair<int, ObjectPtr>> TableHelper::getAllMarkerObjects() {
-                                             rowset<row> rs = ((*sqlite).prepare << "SELECT type, observedId, px, py, pz, qw, qx, qy, qz, ressourcePath, id FROM `recorded_objects` where type like 'marker_%'");
+                                             rowset<row> rs = ((*sqlite).prepare << "SELECT type, observedId, px, py, pz, qw, qx, qy, qz, resourcePath, id FROM `recorded_objects` where type like 'marker_%'");
                                              std::vector<std::pair<int, ObjectPtr>> result;
                                              for (rowset<row>::const_iterator it = rs.begin(); it != rs.end(); ++it) {
     row const& row = *it;
