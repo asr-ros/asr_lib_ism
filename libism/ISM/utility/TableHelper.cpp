@@ -152,6 +152,22 @@ void TableHelper::dropModelTables() const {
     this->dropTable("model_objects");
 }
 
+bool TableHelper::recordDataExists() const
+{
+    int count;
+    (*sqlite) << "SELECT COUNT(*) FROM `recorded_patterns`;", into(count);
+
+    return count;
+}
+
+bool TableHelper::modelDataExists() const
+{
+    int count;
+    (*sqlite) << "SELECT COUNT(*) FROM `model_patterns`;", into(count);
+
+    return count;
+}
+
 int TableHelper::getLastInsertId(const std::string& tablename) const {
     int id = 0;
     try {

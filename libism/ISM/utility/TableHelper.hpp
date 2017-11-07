@@ -59,6 +59,9 @@ namespace ISM {
     void dropTables() const;
     void dropModelTables() const;
 
+    bool recordDataExists() const;
+    bool modelDataExists() const;
+
     int getLastInsertId(const std::string& tablename) const;
 
     const std::set<std::string> getObjectsInPattern(std::string pattern_name);
