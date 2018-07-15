@@ -212,12 +212,9 @@ namespace ISM {
     }
 
     static double getAngleBetweenQuats(const QuaternionPtr& q1, const QuaternionPtr& q2) {
-
-      Eigen::Vector3d v1 = getAxisFromQuat(q1);
-      Eigen::Vector3d v2 = getAxisFromQuat(q2);
-      return getAngleBetweenAxes(v1, v2);
-
+      return rad2deg( q1->eigen.angularDistance(q2->eigen) );
     }
+
     static Eigen::Vector3d getAxisFromQuat(const QuaternionPtr& quat, const Eigen::Vector3d& viewport = Eigen::Vector3d::UnitX()) {
       Eigen::Quaternion<double> rotation = quat->eigen;
       return rotation._transformVector(viewport);
