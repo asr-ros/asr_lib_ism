@@ -17,6 +17,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include "TopologyGenerator.hpp"
 #include "../utility/LogHelper.hpp"
+#include <random>
 
 namespace ISM {
 

@@ -36,6 +36,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "utility/DocumentationHelper.hpp"
 
 #include <ctime>
+#include <random>
 
 namespace ISM {
 
