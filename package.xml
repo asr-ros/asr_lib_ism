@@ -2,7 +2,7 @@
 <package format="2">
   <name>asr_lib_ism</name>
   <version>1.0.0</version>
-  <description>This package integrates a library for scene recognition based on implicit shape models (ISM) to the ros environment.</description>
+  <description>This package contains the ROS-independent library which provides the actual scene-recognition functionality of Implicit Shape Model (ISM) trees. It is referred to both by asr_ism for Passive Scene Recognition and by asr_recognizer_prediction_ism for Active Scene Recognition.</description>
   <author>Hanselmann Fabian, Heller Florian, Heizmann Heinrich, Kübler Marcel, Mehlhaus Jonas, Meißner Pascal, Qattan Mohamad, Reckling Reno, Stroh Daniel</author>
   <maintainer email="asr-ros@lists.kit.edu">Meißner Pascal</maintainer>
   <license>BSD</license>
